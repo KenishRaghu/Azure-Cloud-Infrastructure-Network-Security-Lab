@@ -13,11 +13,11 @@ $nsg = Get-AzNetworkSecurityGroup -ResourceGroupName $ResourceGroupName -Name "n
 $nic = New-AzNetworkInterface -ResourceGroupName $ResourceGroupName -Location $Location `
     -Name "$VmName-nic" -SubnetId $subnet.Id -NetworkSecurityGroupId $nsg.Id
 
-$cred = Get-Credential -Message "Local admin password for $VmName"
+$cred = Get-Credential -UserName $AdminUser -Message "Password for local admin $AdminUser on $VmName"
 $vmConfig = New-AzVMConfig -VMName $VmName -VMSize "Standard_B2s" | `
-    Set-AzVMOperatingSystem -Windows -ComputerName $VmName -Credential $cred | `
+    Set-AzVMOperatingSystem -Windows -ComputerName $VmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate | `
     Set-AzVMSourceImage -PublisherName "MicrosoftWindowsServer" -Offer "WindowsServer" `
     -Skus "2022-Datacenter" -Version "latest" | `
-    Add-AzVMNetworkInterface -Id $nic.Id
+    Add-AzVMNetworkInterface -Id $nic.Id -Primary
 
 New-AzVM -ResourceGroupName $ResourceGroupName -Location $Location -VM $vmConfig
